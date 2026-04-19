@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHAPES Ausgabezettel — Tactical Testprogramm</title>
+<style>
+@font-face {
+  font-family: 'BrutalType';
+  src: url('fonts/BrutalType-Regular.otf') format('opentype'),
+       url('fonts/BrutalType-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'BrutalType', -apple-system, 'Helvetica Neue', sans-serif;
+  background: #1a1a1a;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SCREEN CONTROLS ── */
+.screen-only {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  margin-bottom: 8px;
+}
+.ctrl-btn {
+  padding: 10px 20px; background: #B52A1C; color: #fff;
+  border: none; border-radius: 8px; font-family: 'BrutalType', sans-serif;
+  font-size: 13px; cursor: pointer; letter-spacing: 0.04em;
+}
+.ctrl-btn.ghost {
+  background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #999;
+}
+.url-input {
+  padding: 10px 16px; background: #111; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; font-family: 'BrutalType', sans-serif; font-size: 13px;
+  color: #fff; width: 320px; outline: none;
+}
+.url-input:focus { border-color: #B52A1C; }
+.hint { font-size: 12px; color: #444; text-align: center; }
+
+/* ── SHEET (A5 landscape = 2 cards per A4) ── */
+.sheet {
+  width: 210mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ── CARD ── */
+.card {
+  background: #000;
+  padding: 22mm 18mm;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  min-height: 148mm;
+}
+.card + .card {
+  border-left: 1px dashed #333;
+}
+
+.card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 7mm;
+}
+.card-logo { height: 18px; }
+.card-tag {
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #B52A1C; border: 1px solid rgba(181,42,28,0.4);
+  padding: 3px 8px; border-radius: 20px;
+}
+
+.card-title {
+  font-size: 22px; line-height: 1.05; letter-spacing: -0.02em;
+  color: #fff; margin-bottom: 4mm;
+}
+.card-title em { color: #B52A1C; font-style: normal; }
+
+.card-sub {
+  font-size: 10px; color: #555; line-height: 1.6; margin-bottom: 6mm;
+}
+
+/* ── STEPS ── */
+.steps { display: flex; flex-direction: column; gap: 2.5mm; margin-bottom: 6mm; }
+.step-row { display: flex; gap: 8px; align-items: flex-start; }
+.step-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #B52A1C; color: #fff;
+  font-size: 9px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-size: 10px; color: #888; line-height: 1.5; }
+.step-text strong { color: #ccc; }
+
+/* ── CODE BOX ── */
+.code-box {
+  background: #111; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; padding: 8px 10px; margin-bottom: 6mm;
+}
+.code-label {
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #B52A1C; margin-bottom: 4px;
+}
+.code-example { font-size: 9px; color: #555; line-height: 1.5; }
+.code-write {
+  margin-top: 5px; border-bottom: 1px solid #2e2e2e;
+  height: 18px; width: 100%;
+}
+
+/* ── QR AREA ── */
+.qr-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: auto;
+  padding-top: 5mm;
+  border-top: 1px solid #1a1a1a;
+}
+.qr-wrap {
+  width: 52px; height: 52px; background: #fff;
+  border-radius: 6px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.qr-wrap img { width: 48px; height: 48px; }
+.qr-info { flex: 1; }
+.qr-url { font-size: 8px; color: #555; word-break: break-all; line-height: 1.4; }
+.qr-cta { font-size: 9px; color: #888; margin-bottom: 2px; }
+
+/* ── PRODUCTS ── */
+.products {
+  display: flex; gap: 6px; margin-bottom: 5mm;
+}
+.product-pill {
+  flex: 1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px; padding: 6px 8px;
+}
+.pill-label { font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: #B52A1C; margin-bottom: 2px; }
+.pill-name { font-size: 9px; color: #ccc; line-height: 1.3; }
+.pill-desc { font-size: 8px; color: #444; margin-top: 1px; }
+
+/* ── PRINT ── */
+@media print {
+  body { background: #fff; padding: 0; gap: 0; }
+  .screen-only, .hint { display: none !important; }
+  .sheet {
+    width: 210mm; box-shadow: none; border-radius: 0;
+    page-break-inside: avoid;
+  }
+  @page { size: A4 landscape; margin: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- SCREEN CONTROLS -->
+<div class="screen-only">
+  <input class="url-input" id="url-input" value="https://tactical.get-shapes.com/feedback.html" placeholder="Ihre Feedback-URL eingeben…" oninput="updateQR()">
+  <button class="ctrl-btn" onclick="window.print()">🖨 Drucken / Als PDF</button>
+  <button class="ctrl-btn ghost" onclick="document.getElementById('url-input').select()">URL kopieren</button>
+</div>
+<p class="hint">URL oben eintragen → Drucken → pro A4 Blatt 2 Zettel (schneiden)</p>
+
+<!-- SHEET — 2 cards per A4 landscape -->
+<div class="sheet">
+
+  <!-- CARD 1 -->
+  <div class="card">
+    <div class="card-top">
+      <img class="card-logo" src="assets/logo-white-full.png" alt="SHAPES">
+      <span class="card-tag">Tactical Testprogramm</span>
+    </div>
+
+    <div class="card-title">Ihr Feedback<br>macht den <em>Unterschied.</em></div>
+    <div class="card-sub">Sie haben 2 Paar Shapes erhalten. Bitte tragen Sie einmal jetzt und einmal nach 14 Tagen Ihr Feedback ein.</div>
+
+    <div class="products">
+      <div class="product-pill">
+        <div class="pill-label">Paar 1</div>
+        <div class="pill-name">Allround 2.0</div>
+        <div class="pill-desc">Stiefel / Dienstschuh</div>
+      </div>
+      <div class="product-pill">
+        <div class="pill-label">Paar 2</div>
+        <div class="pill-name">Hybrid Hyrox</div>
+        <div class="pill-desc">Sportschuh / Training</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Jetzt sofort:</strong> QR-Code scannen → Tag 1 Ersterfassung ausfüllen (2 Min.)</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>14 Tage tragen:</strong> Allround im Stiefel, Hybrid im Sportschuh.</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Nach 14 Tagen:</strong> QR-Code scannen → Follow-up ausfüllen.</div>
+      </div>
+    </div>
+
+    <div class="code-box">
+      <div class="code-label">Ihr persönlicher Code</div>
+      <div class="code-example">Erstellen Sie einen Code, den nur Sie kennen — z.B. letzte 4 Ziffern Personalnummer + Anfangsbuchstabe Vorname: <strong style="color:#888;">4829M</strong></div>
+      <div class="code-write"></div>
+      <div style="font-size:8px;color:#444;margin-top:3px;">← Hier eintragen und merken</div>
+    </div>
+
+    <div class="qr-row">
+      <div class="qr-wrap">
+        <img id="qr-img-1" src="" alt="QR Code">
+      </div>
+      <div class="qr-info">
+        <div class="qr-cta">QR-Code scannen</div>
+        <div class="qr-url" id="qr-url-1"></div>
+      </div>
+      <div style="font-size:8px;color:#333;text-align:right;line-height:1.5;">SI Shape<br>Industries GmbH<br>#bebalanced</div>
+    </div>
+  </div>
+
+  <!-- CARD 2 (identical) -->
+  <div class="card">
+    <div class="card-top">
+      <img class="card-logo" src="assets/logo-white-full.png" alt="SHAPES">
+      <span class="card-tag">Tactical Testprogramm</span>
+    </div>
+
+    <div class="card-title">Ihr Feedback<br>macht den <em>Unterschied.</em></div>
+    <div class="card-sub">Sie haben 2 Paar Shapes erhalten. Bitte tragen Sie einmal jetzt und einmal nach 14 Tagen Ihr Feedback ein.</div>
+
+    <div class="products">
+      <div class="product-pill">
+        <div class="pill-label">Paar 1</div>
+        <div class="pill-name">Allround 2.0</div>
+        <div class="pill-desc">Stiefel / Dienstschuh</div>
+      </div>
+      <div class="product-pill">
+        <div class="pill-label">Paar 2</div>
+        <div class="pill-name">Hybrid Hyrox</div>
+        <div class="pill-desc">Sportschuh / Training</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Jetzt sofort:</strong> QR-Code scannen → Tag 1 Ersterfassung ausfüllen (2 Min.)</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>14 Tage tragen:</strong> Allround im Stiefel, Hybrid im Sportschuh.</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Nach 14 Tagen:</strong> QR-Code scannen → Follow-up ausfüllen.</div>
+      </div>
+    </div>
+
+    <div class="code-box">
+      <div class="code-label">Ihr persönlicher Code</div>
+      <div class="code-example">Erstellen Sie einen Code, den nur Sie kennen — z.B. letzte 4 Ziffern Personalnummer + Anfangsbuchstabe Vorname: <strong style="color:#888;">4829M</strong></div>
+      <div class="code-write"></div>
+      <div style="font-size:8px;color:#444;margin-top:3px;">← Hier eintragen und merken</div>
+    </div>
+
+    <div class="qr-row">
+      <div class="qr-wrap">
+        <img id="qr-img-2" src="" alt="QR Code">
+      </div>
+      <div class="qr-info">
+        <div class="qr-cta">QR-Code scannen</div>
+        <div class="qr-url" id="qr-url-2"></div>
+      </div>
+      <div style="font-size:8px;color:#333;text-align:right;line-height:1.5;">SI Shape<br>Industries GmbH<br>#bebalanced</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function updateQR() {
+  const url = document.getElementById('url-input').value.trim() || 'https://tactical.get-shapes.com/feedback.html';
+  const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=000000&bgcolor=FFFFFF&data=' + encodeURIComponent(url);
+  document.getElementById('qr-img-1').src = qrApi;
+  document.getElementById('qr-img-2').src = qrApi;
+  document.getElementById('qr-url-1').textContent = url;
+  document.getElementById('qr-url-2').textContent = url;
+}
+updateQR();
+</script>
+</body>
+</html>
